@@ -2,13 +2,14 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState } from 'react';
 import { ImageBackground, StyleSheet, Text, View, Image, Pressable } from 'react-native';
 import { Button } from '../components/index';
+import Outcome from '../components/Outcome';
 
 export default function AttackScreen({ route, navigation }) {
-  const { stats } = route.params;
+  const { stats, userId } = route.params;
   const [results, setResults] = useState(false);
   const [attack, setAttack] = useState(1);
   const [defense, setDefense] = useState(stats.defense);
-  const [outcome, setOutcome] = useState('Awaiting Results!')
+  const [outcome, setOutcome] = useState(null)
 
   const getUserImage = () => {
     let character = stats.character;
@@ -39,6 +40,23 @@ export default function AttackScreen({ route, navigation }) {
     }
   }
 
+  const submitAttack = async () => {
+    setResults(true);
+    await fetch(`https://mmr-api.anthonybautist2.repl.co/api/attack/${userId}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          attack: attack,
+          defense: defense
+      }),
+    }).then(result => result.json()).then(rj =>{
+      setOutcome(<Outcome attack={rj["attack"]} defense={rj["defense"]} outcomeText={rj["outcome"]}></Outcome>)
+    });
+  }
+
   return (
     <View style={styles.main}>
       <ImageBackground source={require('../assets/splash.png')} resizeMode="cover" style={styles.image}>
@@ -56,8 +74,8 @@ export default function AttackScreen({ route, navigation }) {
                     <Text style={styles.subtitle}>Select Attack</Text>
                   </View>
                   <View style={styles['1col']}>
-                    <Pressable onPress={() => setAttack(1)} key="test2">
-                      <Image source={require('../assets/SWORD.png')} key="test" style={{
+                    <Pressable onPress={() => setAttack(1)}>
+                      <Image source={require('../assets/SWORD.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -68,8 +86,8 @@ export default function AttackScreen({ route, navigation }) {
                     </Pressable>
                   </View>
                   <View style={styles['1col']}>
-                  <Pressable onPress={() => setAttack(2)} key="test2">
-                      <Image source={require('../assets/SPELLBOOK.png')} key="test" style={{
+                  <Pressable onPress={() => setAttack(2)}>
+                      <Image source={require('../assets/SPELLBOOK.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -80,8 +98,8 @@ export default function AttackScreen({ route, navigation }) {
                     </Pressable>
                   </View>
                   <View style={styles['1col']}>
-                  <Pressable onPress={() => setAttack(3)} key="test2">
-                      <Image source={require('../assets/BOW.png')} key="test" style={{
+                  <Pressable onPress={() => setAttack(3)}>
+                      <Image source={require('../assets/BOW.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -97,8 +115,8 @@ export default function AttackScreen({ route, navigation }) {
                     <Text style={styles.subtitle}>Select Defense</Text>
                   </View>
                   <View style={styles['1col']}>
-                    <Pressable onPress={() => setDefense(1)} key="test2">
-                      <Image source={require('../assets/SWORD.png')} key="test" style={{
+                    <Pressable onPress={() => setDefense(1)}>
+                      <Image source={require('../assets/SWORD.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -109,8 +127,8 @@ export default function AttackScreen({ route, navigation }) {
                     </Pressable>
                   </View>
                   <View style={styles['1col']}>
-                  <Pressable onPress={() => setDefense(2)} key="test2">
-                      <Image source={require('../assets/SPELLBOOK.png')} key="test" style={{
+                  <Pressable onPress={() => setDefense(2)}>
+                      <Image source={require('../assets/SPELLBOOK.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -121,8 +139,8 @@ export default function AttackScreen({ route, navigation }) {
                     </Pressable>
                   </View>
                   <View style={styles['1col']}>
-                  <Pressable onPress={() => setDefense(3)} key="test2">
-                      <Image source={require('../assets/BOW.png')} key="test" style={{
+                  <Pressable onPress={() => setDefense(3)}>
+                      <Image source={require('../assets/BOW.png')} style={{
                           width: 100,
                           height: 100,
                           alignSelf: 'center',
@@ -135,7 +153,7 @@ export default function AttackScreen({ route, navigation }) {
                 </View>
                 <View>
                   <Button
-                    onPress={() => setResults(true)}
+                    onPress={() => submitAttack()}
                     backgroundColor='#2E7D32'
                     title='Attack'
                     tileColor='#fff'
@@ -148,9 +166,17 @@ export default function AttackScreen({ route, navigation }) {
               </View>
             :
               <View>
-                <View style={styles.row}>
-                  <Text style={styles.title}>{outcome}</Text>
-                </View>
+                {
+                  !outcome ?
+                    <View style={styles.row}>
+                      <Text style={styles.title}>Awaiting Results!</Text>
+                    </View>
+                  :
+                    <View style={styles.row}>
+                      {outcome}
+                    </View>
+                }
+                
                 <Button  onPress={() => navigation.goBack(null)}
                   backgroundColor='#2E7D32'
                   title='Home'

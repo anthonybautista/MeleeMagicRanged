@@ -137,7 +137,7 @@ export default function HomeScreen({ navigation }) {
             stats ? 
             <View>
               <Button
-                onPress={() => navigation.navigate('Attack', {stats: Object.values(stats)[0]})}
+                onPress={() => navigation.navigate('Attack', {stats: Object.values(stats)[0], userId: user.uid})}
                 backgroundColor='#2E7D32'
                 title='Attack'
                 tileColor='#fff'
